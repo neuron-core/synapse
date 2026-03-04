@@ -191,7 +191,7 @@ The agent can read and analyze files in your current directory to provide contex
 
 ```bash
 neuron              # Start interactive chat
-neuron "text"        # Ask a single question
+neuron "your prompt here"        # Ask a single question
 ```
 
 ## How It Works
