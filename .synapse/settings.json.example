@@ -1,20 +1,8 @@
 {
   "provider": {
-    "type: "anthropic",
+    "type": "anthropic",
     "api_key": "ANTHROPIC_API_KEY",
     "model": "claude-sonnet-4-20250514",
     "max_tokens": 8192
-  },
-  "mcp_servers": {
-    "inspector": {
-      "url": "https://app.inspector.dev/mcp?app=XXXX",
-      "token": "INSPECTOR_API_TOKEN"
-    },
-    "brave-search": {
-      "command": "uvx",
-      "args": [
-        "mcp-brave-search"
-      ]
-    },
   }
 }
