@@ -17,7 +17,7 @@ if (php_sapi_name() !== 'cli') {
     exit;
 }
 
-require __DIR__ . '/vendor/autoload.php';
+require __DIR__ . '/../vendor/autoload.php';
 
 use Minicli\App;
 
