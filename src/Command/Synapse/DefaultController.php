@@ -24,6 +24,9 @@ use function strtolower;
 use function trim;
 use function mb_strlen;
 use function mb_substr;
+use function escapeshellarg;
+use function passthru;
+use function shell_exec;
 
 use const JSON_PRETTY_PRINT;
 
@@ -228,7 +231,7 @@ class DefaultController extends CommandController
             // Fall back to plain display with a recommendation
             $this->display($content);
             $this->newline();
-            $this->warn("Tip: Install 'glow' for better markdown rendering:");
+            $this->info("Tip: Install 'glow' for better markdown rendering:");
             $this->display("  - Ubuntu/Debian: sudo apt install glow");
             $this->display("  - macOS: brew install glow");
             $this->display("  - Via cargo: cargo install glow");
