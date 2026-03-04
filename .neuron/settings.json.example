@@ -1,18 +1,14 @@
 {
   "provider": "anthropic",
   "anthropic": {
-    "api_key": "your_anthropic_api_key_here",
+    "api_key": "ANTHROPIC_API_KEY",
     "model": "claude-sonnet-4-20250514",
     "max_tokens": 8192
   },
   "mcp_servers": {
-    "filesystem": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-filesystem",
-        "/path/to/workspace"
-      ]
+    "inspector": {
+      "url": "https://app.inspector.dev/mcp?app=XXXX",
+      "token": "INSPECTOR_API_TOKEN"
     },
     "brave-search": {
       "command": "uvx",
@@ -20,15 +16,5 @@
         "mcp-brave-search"
       ]
     },
-    "github": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-github"
-      ],
-      "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": "your_github_token_here"
-      }
-    }
   }
 }
