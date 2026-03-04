@@ -22,6 +22,8 @@ use function json_encode;
 use function sprintf;
 use function strtolower;
 use function trim;
+use function mb_strlen;
+use function mb_substr;
 
 use const JSON_PRETTY_PRINT;
 
@@ -117,9 +119,7 @@ class DefaultController extends CommandController
             $this->clearOutput();
 
             // Print the response
-            $content = $response->getContent() ?? 'No response received.';
-            $this->display($content);
-            $this->newline();
+            $this->displayResponse($response->getContent() ?? 'No response received.');
         } catch (WorkflowInterrupt $interrupt) {
             $this->clearOutput();
             $this->handleWorkflowInterrupt($interrupt);
@@ -147,7 +147,10 @@ class DefaultController extends CommandController
 
         // Display each action and get user approval
         foreach ($approvalRequest->getPendingActions() as $action) {
-            $this->display(sprintf("%s( %s )", $action->name, $action->description), true);
+            $description = mb_strlen((string) $action->description) > 250
+                ? mb_substr((string) $action->description, 0, 247) . '...'
+                : $action->description;
+            $this->display(sprintf("%s( %s )", $action->name, $description), true);
 
             // Get user decision
             $decision = $this->askDecision();
@@ -164,9 +167,7 @@ class DefaultController extends CommandController
             $this->clearOutput();
 
             // Print the response
-            $content = $response->getContent() ?? 'No response received.';
-            $this->display($content);
-            $this->newline();
+            $this->displayResponse($response->getContent() ?? 'No response received.');
         } catch (WorkflowInterrupt $nestedInterrupt) {
             $this->clearOutput();
             // Handle the next interruption that occurred during resumption
@@ -211,5 +212,37 @@ class DefaultController extends CommandController
             $action->reject();
         }
         $this->newline();
+    }
+
+    /**
+     * Display the agent's response with markdown formatting if glow is available.
+     *
+     * @param string $content The markdown-formatted content to display
+     */
+    private function displayResponse(string $content): void
+    {
+        if ($this->isGlowInstalled()) {
+            // Use glow for beautiful markdown rendering
+            passthru("echo " . escapeshellarg($content) . " | glow -");
+        } else {
+            // Fall back to plain display with a recommendation
+            $this->display($content);
+            $this->newline();
+            $this->warn("Tip: Install 'glow' for better markdown rendering:");
+            $this->display("  - Ubuntu/Debian: sudo apt install glow");
+            $this->display("  - macOS: brew install glow");
+            $this->display("  - Via cargo: cargo install glow");
+            $this->newline();
+        }
+    }
+
+    /**
+     * Check if glow is installed on the system.
+     *
+     * @return bool True if glow is available, false otherwise
+     */
+    private function isGlowInstalled(): bool
+    {
+        return shell_exec('command -v glow') !== null;
     }
 }
