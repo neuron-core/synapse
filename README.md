@@ -120,11 +120,6 @@ Add Model Context Protocol servers to extend the agent's capabilities:
 
 ```json
 {
-  "provider": {
-      "type": "ollama",
-      "base_url": "http://localhost:11434",
-      "model": "llama2"
-  },
   "mcp_servers": {
     "filesystem": {
       "command": "npx",
