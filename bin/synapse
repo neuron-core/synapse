@@ -17,7 +17,21 @@ if (php_sapi_name() !== 'cli') {
     exit;
 }
 
-require __DIR__ . '/../vendor/autoload.php';
+// Find autoloader
+$autoloadPaths = [
+    __DIR__ . '/../vendor/autoload.php',
+    __DIR__ . '/../../../autoload.php',
+    __DIR__ . '/../../../../autoload.php',
+];
+
+$autoloaderFound = false;
+foreach ($autoloadPaths as $autoloadPath) {
+    if (file_exists($autoloadPath)) {
+        require_once $autoloadPath;
+        $autoloaderFound = true;
+        break;
+    }
+}
 
 use Minicli\App;
 
