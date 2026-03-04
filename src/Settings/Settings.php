@@ -14,24 +14,51 @@ class Settings implements SettingsInterface
 {
     private array $settings = [];
     private ProviderFactoryInterface $providerFactory;
+    private string $settingsPath;
+    private bool $fileExists = false;
 
     public function __construct(?string $settingsPath = null, ?ProviderFactoryInterface $providerFactory = null)
     {
+        $this->settingsPath = $settingsPath ?? getcwd() . '/.neuron/settings.json';
         $this->providerFactory = $providerFactory ?? new ProviderFactory();
-        $this->load($settingsPath);
+        $this->load();
     }
 
     /**
      * Load settings from the specified path or default location.
      */
-    private function load(?string $path): void
+    private function load(): void
     {
-        $settingsPath = $path ?? getcwd() . '/.neuron/settings.json';
+        $this->fileExists = file_exists($this->settingsPath);
 
-        if (file_exists($settingsPath)) {
-            $content = file_get_contents($settingsPath);
+        if ($this->fileExists) {
+            $content = file_get_contents($this->settingsPath);
             $this->settings = json_decode($content, true) ?? [];
         }
+    }
+
+    /**
+     * Check if the settings file exists.
+     */
+    public function fileExists(): bool
+    {
+        return $this->fileExists;
+    }
+
+    /**
+     * Get the settings file path.
+     */
+    public function getSettingsPath(): string
+    {
+        return $this->settingsPath;
+    }
+
+    /**
+     * Check if the settings have valid provider configuration.
+     */
+    public function hasValidProvider(): bool
+    {
+        return isset($this->settings['provider']) && isset($this->settings['provider']['type']);
     }
 
     /**

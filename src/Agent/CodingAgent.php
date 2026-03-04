@@ -10,7 +10,6 @@ use NeuronAI\Agent\Nodes\ToolNode;
 use NeuronAI\Exceptions\WorkflowException;
 use NeuronAI\MCP\McpConnector;
 use NeuronCore\CodingAgent\Settings\SettingsInterface;
-use NeuronCore\CodingAgent\Settings\Settings;
 use NeuronAI\Providers\AIProviderInterface;
 use NeuronAI\Tools\Toolkits\FileSystem\FileSystemToolkit;
 
@@ -21,20 +20,19 @@ use NeuronAI\Tools\Toolkits\FileSystem\FileSystemToolkit;
  *
  * This agent is designed to help with software engineering tasks in the CLI environment.
  * It has access to filesystem tools to read, search, and analyze code.
+ *
+ * @method static static make(SettingsInterface $settings)
  */
 class CodingAgent extends Agent
 {
-    private SettingsInterface $settings;
-
     /**
      * Constructor - Initialize with settings loader.
      *
      * @throws WorkflowException
      */
-    public function __construct()
+    public function __construct(protected SettingsInterface $settings)
     {
         parent::__construct();
-        $this->settings = new Settings();
     }
 
     protected function middleware(): array

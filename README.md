@@ -1,4 +1,4 @@
-# Coding Agent
+# Neuron - Coding Agent
 
 > AI-powered coding assistant built entirely in PHP with Neuron AI framework.
 
@@ -58,12 +58,12 @@ mkdir -p .neuron && printf "{\n}" > .neuron/settings.json
 
 ```json
 {
-  "provider": "anthropic",
-  "anthropic": {
-    "api_key": "sk-ant-your-api-key-here",
-    "model": "claude-sonnet-4-20250514",
-    "max_tokens": 8192
-  }
+    "provider": {
+        "type": "anthropic",
+        "api_key": "sk-ant-your-api-key-here",
+        "model": "claude-sonnet-4-20250514",
+        "max_tokens": 8192
+    }
 }
 ```
 
@@ -71,12 +71,12 @@ mkdir -p .neuron && printf "{\n}" > .neuron/settings.json
 
 ```json
 {
-  "provider": "openai",
-  "openai": {
-    "api_key": "sk-your-openai-key-here",
-    "model": "gpt-4",
-    "max_tokens": 8192
-  }
+    "provider": {
+        "type": "openai",
+        "api_key": "sk-your-openai-key-here",
+        "model": "gpt-4",
+        "max_tokens": 8192
+    }
 }
 ```
 
@@ -84,12 +84,12 @@ mkdir -p .neuron && printf "{\n}" > .neuron/settings.json
 
 ```json
 {
-  "provider": "gemini",
-  "gemini": {
-    "api_key": "your-gemini-api-key",
-    "model": "gemini-pro",
-    "max_tokens": 8192
-  }
+    "provider": {
+        "type": "gemini",
+        "api_key": "your-gemini-api-key",
+        "model": "gemini-pro",
+        "max_tokens": 8192
+    }
 }
 ```
 
@@ -97,11 +97,11 @@ mkdir -p .neuron && printf "{\n}" > .neuron/settings.json
 
 ```json
 {
-  "provider": "ollama",
-  "ollama": {
-    "base_url": "http://localhost:11434",
-    "model": "llama2"
-  }
+    "provider": {
+        "type": "ollama",
+        "base_url": "http://localhost:11434",
+        "model": "llama2"
+    }
 }
 ```
 
@@ -113,29 +113,16 @@ The following providers are also supported with similar configuration:
 - **Grok (xAI)**: Set `provider: "xai"` with `xai.api_key` (or `grok.api_key`)
 - **Deepseek**: Set `provider: "deepseek"` with `deepseek.api_key`
 
-### Global API Key
-
-You can also use a global `api_key` that works with all providers:
-
-```json
-{
-  "provider": "anthropic",
-  "api_key": "sk-ant-your-api-key-here",
-  "anthropic": {
-    "model": "claude-sonnet-4-20250514"
-  }
-}
-```
-
 ### MCP Server Configuration
 
 Add Model Context Protocol servers to extend the agent's capabilities:
 
 ```json
 {
-  "provider": "anthropic",
-  "anthropic": {
-    "api_key": "sk-ant-your-api-key-here"
+  "provider": {
+      "type": "ollama",
+      "base_url": "http://localhost:11434",
+      "model": "llama2"
   },
   "mcp_servers": {
     "filesystem": {

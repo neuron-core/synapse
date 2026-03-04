@@ -46,18 +46,17 @@ class ProviderFactory implements ProviderFactoryInterface
      *
      * @throws \RuntimeException if provider cannot be created
      */
-    public function create(array $settings): AIProviderInterface
+    public function create(array $config): AIProviderInterface
     {
-        $provider = $settings['provider'] ?? 'anthropic';
-        $providerKey = strtolower($provider);
+        $type = strtolower($config['type']);
 
-        if (!isset($this->factories[$providerKey])) {
+        if (!isset($this->factories[$type])) {
             throw new \RuntimeException(
-                sprintf('Unknown provider "%s". Available providers: %s', $provider, implode(', ', array_keys($this->factories)))
+                sprintf('Unknown provider "%s". Available providers: %s', $this->factories[$type], implode(', ', array_keys($this->factories)))
             );
         }
 
-        return ($this->factories[$providerKey])($settings);
+        return ($this->factories[$type])($config);
     }
 
     /**

@@ -33,4 +33,19 @@ interface SettingsInterface
      * Get a specific setting value.
      */
     public function get(string $key, mixed $default = null): mixed;
+
+    /**
+     * Check if the settings file exists.
+     */
+    public function fileExists(): bool;
+
+    /**
+     * Check if the settings have valid provider configuration.
+     */
+    public function hasValidProvider(): bool;
+
+    /**
+     * Get the settings file path.
+     */
+    public function getSettingsPath(): string;
 }

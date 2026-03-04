@@ -9,6 +9,8 @@ use NeuronAI\Chat\Messages\UserMessage;
 use NeuronAI\Exceptions\WorkflowException;
 use NeuronAI\Workflow\Interrupt\WorkflowInterrupt;
 use NeuronCore\CodingAgent\Agent\CodingAgent;
+use NeuronCore\CodingAgent\Settings\Settings;
+use NeuronCore\CodingAgent\Settings\SettingsInterface;
 use function str_repeat;
 
 /**
@@ -27,7 +29,42 @@ class DefaultController extends CommandController
      */
     public function handle(): void
     {
-        $this->agent = CodingAgent::make();
+        // Load and validate settings
+        $settings = new Settings();
+
+        if (!$settings->fileExists()) {
+            $this->error("Warning: Settings file not found at " . $settings->getSettingsPath());
+            $this->error("The agent requires AI provider connection information.");
+            $this->newline();
+            $this->info("Create a settings.json file with your AI provider configuration:");
+            $this->display(json_encode([
+                'provider' => [
+                    'type' => 'openai',
+                    'api_key' => 'your-api-key',
+                    'model' => 'gpt-4',
+                ],
+            ], JSON_PRETTY_PRINT));
+            $this->newline();
+            return;
+        }
+
+        if (!$settings->hasValidProvider()) {
+            $this->error("Warning: Settings file is missing valid provider configuration.");
+            $this->error("The 'provider.type' setting is required.");
+            $this->newline();
+            return;
+        }
+
+        $this->start($settings);
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    protected function start(SettingsInterface $settings): void
+    {
+        // Pass validated settings to the agent
+        $this->agent = CodingAgent::make($settings);
 
         $message = $this->hasParam('message')
             ? $this->getParam('message')
