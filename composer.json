@@ -2,7 +2,6 @@
     "name": "neuron-core/synapse",
     "description": "AI Coding Assistant built entirely in PHP with Neuron AI framework",
     "type": "library",
-    "version": "0.1.0",
     "keywords": [
         "ai",
         "anthropic",
