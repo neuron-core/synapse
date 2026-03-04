@@ -211,19 +211,6 @@ The agent has access to filesystem tools that allow it to:
 - Find files by glob patterns
 - Parse documents (PDF, HTML, etc.)
 
-## Supported AI Providers
-
-| Provider | Key Required | Notes |
-|----------|---------------|-------|
-| Anthropic | `anthropic.api_key` | Default provider, Claude models |
-| OpenAI | `openai.api_key` | GPT models |
-| Gemini | `gemini.api_key` | Google AI models |
-| Cohere | `cohere.api_key` | Command models |
-| Mistral | `mistral.api_key` | Mistral AI models |
-| Ollama | None required | Local inference |
-| Grok | `xai.api_key` or `grok.api_key` | xAI models |
-| Deepseek | `deepseek.api_key` | Deepseek models |
-
 ## Security
 
 - Your code is processed locally and only sent to your configured AI provider's API
