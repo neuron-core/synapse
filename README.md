@@ -55,7 +55,7 @@ Create a `.neuron` directory in your project and add a `settings.json` file:
 mkdir -p .neuron && printf "{\n}" > .neuron/settings.json
 ```
 
-#### Anthropic (Default)
+#### Anthropic
 
 ```json
 {
