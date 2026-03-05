@@ -24,9 +24,13 @@ use function strtolower;
 use function trim;
 use function mb_strlen;
 use function mb_substr;
-use function escapeshellarg;
 use function passthru;
 use function shell_exec;
+use function fclose;
+use function fwrite;
+use function is_resource;
+use function proc_close;
+use function proc_open;
 
 use const JSON_PRETTY_PRINT;
 use const STDIN;
@@ -294,7 +298,6 @@ class DefaultController extends CommandController
      * Run glow with proper PTY allocation for terminal formatting.
      *
      * @param string $content The markdown content to display
-     * @return void
      */
     private function runGlowWithPty(string $content): void
     {
