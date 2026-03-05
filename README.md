@@ -2,7 +2,7 @@
 
 AI-powered coding assistant built entirely in PHP with [Neuron AI framework](https://neuron-ai.dev).
 
-Coding Agent is a command-line tool that helps developers with software engineering tasks.
+Synapse is a command-line tool that helps developers with software engineering tasks.
 It runs locally on your machine and provides intelligent assistance for coding, debugging, code reviews, and more using multiple AI providers.
 
 ![PHP](https://img.shields.io/badge/PHP-8.1%2B-blue)
