@@ -29,12 +29,20 @@ use function array_reduce;
 class CodingAgent extends Agent
 {
     /**
+     * @var string[] List of tools that are always allowed (no approval required)
+     */
+    private array $alwaysAllowedTools = [];
+
+    /**
      * Constructor - Initialize with settings loader.
      *
      * @throws WorkflowException
      */
     public function __construct(protected SettingsInterface $settings)
     {
+        // Load always-allowed tools from settings
+        $this->alwaysAllowedTools = $settings->getAllowedTools();
+
         parent::__construct();
     }
 
@@ -42,9 +50,30 @@ class CodingAgent extends Agent
     {
         return [
             ToolNode::class => [
-                new ToolApproval()
+                new ToolApproval($this->getToolsRequiringApproval())
             ],
         ];
+    }
+
+    /**
+     * Get the list of tools that require approval.
+     *
+     * Uses the callable approach where returning `false` means the tool
+     * does not require approval. For always-allowed tools, we return false.
+     *
+     * @return array<string, callable(array): bool>
+     */
+    private function getToolsRequiringApproval(): array
+    {
+        $tools = [];
+
+        // For each always-allowed tool, add a callable that returns false
+        // (meaning the tool does NOT require approval)
+        foreach ($this->alwaysAllowedTools as $toolName) {
+            $tools[$toolName] = fn(array $args): bool => false;
+        }
+
+        return $tools;
     }
 
     /**
@@ -53,6 +82,16 @@ class CodingAgent extends Agent
     public function settings(): SettingsInterface
     {
         return $this->settings;
+    }
+
+    /**
+     * Get the list of always-allowed tools.
+     *
+     * @return string[]
+     */
+    public function getAlwaysAllowedTools(): array
+    {
+        return $this->alwaysAllowedTools;
     }
 
     protected function provider(): AIProviderInterface
@@ -66,7 +105,7 @@ class CodingAgent extends Agent
     protected function tools(): array
     {
         return [
-            new FileSystemToolkit(),
+            FileSystemToolkit::make(),
 
             // Load tools from MCP servers
             ...array_reduce(

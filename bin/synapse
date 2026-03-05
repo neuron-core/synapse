@@ -41,7 +41,7 @@ $app = new App([
     'app_path' => [
         dirname(__DIR__) . '/src/Command',
     ],
-    'theme' => '\Unicorn',
+    'theme' => '\Default',
     'debug' => false,
 ]);
 

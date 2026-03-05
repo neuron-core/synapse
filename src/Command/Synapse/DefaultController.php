@@ -39,6 +39,16 @@ class DefaultController extends CommandController
 {
     use CommandHelper;
 
+    /**
+     * @var string[] Array of action names allowed for the current session only
+     */
+    private array $sessionAllowedActions = [];
+
+    /**
+     * @var string[] Array of action names always allowed across sessions (from settings)
+     */
+    private array $alwaysAllowedActions = [];
+
     protected ?CodingAgent $agent = null;
 
     /**
@@ -84,6 +94,9 @@ class DefaultController extends CommandController
     {
         // Initialize agent
         $this->agent = CodingAgent::make($settings);
+
+        // Load always-allowed tools from settings (persists across sessions)
+        $this->alwaysAllowedActions = $settings->getAllowedTools();
 
         $this->info("=== Synapse Coding Agent - built with Neuron AI framework ===");
         $this->info("Type 'exit' or 'quit' to end the conversation.");
@@ -151,8 +164,24 @@ class DefaultController extends CommandController
                 : $action->description;
             $this->display(sprintf("%s( %s )", $action->name, $description), true);
 
+            // Check if this action is always allowed (persists across sessions)
+            if (in_array($action->name, $this->alwaysAllowedActions, true)) {
+                $this->info("Automatically approved (always allowed).");
+                $this->newline();
+                $action->approve();
+                continue;
+            }
+
+            // Check if this action is session-allowed (current session only)
+            if (in_array($action->name, $this->sessionAllowedActions, true)) {
+                $this->info("Automatically approved (session allowed).");
+                $this->newline();
+                $action->approve();
+                continue;
+            }
+
             // Get user decision
-            $decision = $this->askDecision();
+            $decision = $this->askDecision($action->name);
 
             // Process the decision
             $this->processDecision($action, $decision);
@@ -177,23 +206,40 @@ class DefaultController extends CommandController
     /**
      * Ask the user for their decision on an action.
      *
-     * @return string The user's decision ('y' or 'n')
+     * @param string $actionName The name of the action being approved
+     * @return string The user's decision ('allow', 'session', 'always', or 'reject')
      */
-    private function askDecision(): string
+    private function askDecision(string $actionName): string
     {
+        $this->newline();
+        $this->display("Options:");
+        $this->display("  1) Allow - Execute this action once");
+        $this->display("  2) Session allow - Allow this tool for the current session");
+        $this->display("  3) Always allow - Allow this tool permanently (saved to settings.json)");
+        $this->display("  4) Reject - Do not execute this action");
+        $this->newline();
+
         while (true) {
-            $decision = (new Input(prompt: 'Approve this action? ("n" to reject):  '))->read();
+            $decision = (new Input(prompt: 'Enter your choice (1/2/3/4):  '))->read();
             $decision = strtolower(trim($decision));
 
-            if (in_array($decision, ['', 'y', 'yes'], true)) {
-                return 'y';
+            if (in_array($decision, ['1', 'allow'], true)) {
+                return 'allow';
             }
 
-            if ($decision === 'n' || $decision === 'no') {
-                return 'n';
+            if (in_array($decision, ['2', 'session', 'session allow', 's'], true)) {
+                return 'session';
             }
 
-            $this->error("Invalid choice. Please enter 'y' or 'n'.");
+            if (in_array($decision, ['3', 'always', 'always allow', 'a'], true)) {
+                return 'always';
+            }
+
+            if (in_array($decision, ['4', 'reject', 'no', 'n', 'r'], true)) {
+                return 'reject';
+            }
+
+            $this->error("Invalid choice. Please enter 1, 2, 3, or 4.");
         }
     }
 
@@ -201,13 +247,26 @@ class DefaultController extends CommandController
      * Process the user's decision on an action.
      *
      * @param object $action The action to process
-     * @param string $decision The user's decision ('y' or 'n')
+     * @param string $decision The user's decision ('allow', 'session', 'always', or 'reject')
      */
     private function processDecision(object $action, string $decision): void
     {
-        if ($decision === 'y') {
+        if ($decision === 'allow' || $decision === 'session' || $decision === 'always') {
             $action->approve();
-        } else {
+
+            if ($decision === 'session') {
+                $this->sessionAllowedActions[] = $action->name;
+                $this->info("Tool '{$action->name}' is now allowed for this session.");
+            } elseif ($decision === 'always') {
+                // Add to both arrays (session for immediate use, and settings for persistence)
+                $this->alwaysAllowedActions[] = $action->name;
+                $this->sessionAllowedActions[] = $action->name;
+
+                // Persist to settings
+                $this->agent->settings()->addAllowedTool($action->name);
+                $this->info("Tool '{$action->name}' is now always allowed (saved to settings.json).");
+            }
+        } elseif ($decision === 'reject') {
             $action->reject();
         }
         $this->newline();
