@@ -29,6 +29,9 @@ use function passthru;
 use function shell_exec;
 
 use const JSON_PRETTY_PRINT;
+use const STDIN;
+use const STDOUT;
+use const STDERR;
 
 /**
  * ChatCommand - Interactive chat with the Coding Agent.
@@ -273,8 +276,8 @@ class DefaultController extends CommandController
     private function displayResponse(string $content): void
     {
         if ($this->isGlowInstalled()) {
-            // Use glow for beautiful markdown rendering
-            passthru("echo " . escapeshellarg($content) . " | glow -");
+            // Use glow for beautiful markdown rendering with PTY for proper TTY access
+            $this->runGlowWithPty($content);
         } else {
             // Fall back to plain display with a recommendation
             $this->display($content);
@@ -285,6 +288,59 @@ class DefaultController extends CommandController
             $this->display("  - Via cargo: cargo install glow");
             $this->newline();
         }
+    }
+
+    /**
+     * Run glow with proper PTY allocation for terminal formatting.
+     *
+     * @param string $content The markdown content to display
+     * @return void
+     */
+    private function runGlowWithPty(string $content): void
+    {
+        $descriptors = [
+            ['pipe', 'r'],  // stdin - we'll write the content here
+            STDOUT,         // stdout - direct to our stdout
+            STDERR,         // stderr - direct to our stderr
+        ];
+
+        // On Unix-like systems, we need to allocate a PTY
+        // Try to use script or similar for PTY allocation
+        $command = $this->getGlowCommandWithPty();
+
+        $process = proc_open($command, $descriptors, $pipes);
+
+        if (!is_resource($process)) {
+            // Fallback to simple passthru if proc_open fails
+            $this->display($content);
+            return;
+        }
+
+        // Write content to glow's stdin
+        fwrite($pipes[0], $content);
+        fclose($pipes[0]);
+
+        // Wait for the process to complete
+        $exitCode = proc_close($process);
+
+        // If glow failed, fall back to plain display
+        if ($exitCode !== 0) {
+            $this->display($content);
+        }
+    }
+
+    /**
+     * Get the appropriate glow command with PTY allocation.
+     *
+     * @return string The shell command to run
+     */
+    private function getGlowCommandWithPty(): string
+    {
+        // Use script to allocate a PTY (works on Linux/macOS)
+        // script -c runs the command in a PTY and exits
+        // -q for quiet mode
+        // /dev/null as the script typescript file (we don't need it)
+        return 'script -q -c "glow -" /dev/null';
     }
 
     /**
