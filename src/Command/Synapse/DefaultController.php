@@ -181,7 +181,7 @@ class DefaultController extends CommandController
             }
 
             // Get user decision
-            $decision = $this->askDecision($action->name);
+            $decision = $this->askDecision();
 
             // Process the decision
             $this->processDecision($action, $decision);
@@ -206,10 +206,9 @@ class DefaultController extends CommandController
     /**
      * Ask the user for their decision on an action.
      *
-     * @param string $actionName The name of the action being approved
      * @return string The user's decision ('allow', 'session', 'always', or 'reject')
      */
-    private function askDecision(string $actionName): string
+    private function askDecision(): string
     {
         $this->newline();
         $this->display("Options:");
@@ -218,7 +217,6 @@ class DefaultController extends CommandController
         $this->display("  3) Always allow - Allow this tool permanently (saved to settings.json)");
         $this->display("  4) Reject - Do not execute this action");
         $this->newline();
-
         while (true) {
             $decision = (new Input(prompt: 'Enter your choice (1/2/3/4):  '))->read();
             $decision = strtolower(trim($decision));
@@ -251,7 +249,7 @@ class DefaultController extends CommandController
      */
     private function processDecision(object $action, string $decision): void
     {
-        if ($decision === 'allow' || $decision === 'session' || $decision === 'always') {
+        if (in_array($decision, ['allow', 'session', 'always'], true)) {
             $action->approve();
 
             if ($decision === 'session') {

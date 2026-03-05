@@ -70,7 +70,7 @@ class CodingAgent extends Agent
         // For each always-allowed tool, add a callable that returns false
         // (meaning the tool does NOT require approval)
         foreach ($this->alwaysAllowedTools as $toolName) {
-            $tools[$toolName] = fn(array $args): bool => false;
+            $tools[$toolName] = fn (array $args): bool => false;
         }
 
         return $tools;

@@ -17,6 +17,13 @@ use function is_array;
 use function json_decode;
 use function sprintf;
 use function str_contains;
+use function array_search;
+use function array_values;
+use function file_put_contents;
+use function in_array;
+use function json_encode;
+
+use const JSON_PRETTY_PRINT;
 
 /**
  * Loads and manages agent configuration from .synapse/settings.json.
