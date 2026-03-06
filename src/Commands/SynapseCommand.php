@@ -76,17 +76,16 @@ class SynapseCommand extends Command
         $orchestrator = new AgentOrchestrator(CodingAgent::make($settings), $dispatcher);
 
         $output->writeln("\n");
-        $output->writeln("<fg=cyan;options=bold>.----------------.  .----------------.  .-----------------. .----------------.  .----------------.  .----------------.  .----------------. </>");
-        $output->writeln("<fg=cyan;options=bold>| .--------------. || .--------------. || .--------------. || .--------------. || .--------------. || .--------------. || .--------------. |</>");
-        $output->writeln("<fg=cyan;options=bold>| |    _______   | || |  ____  ____  | || | ____  _____  | || |      __      | || |   ______     | || |    _______   | || |  _________   | |</>");
-        $output->writeln("<fg=cyan;options=bold>| |   /  ___  |  | || | |_  _||_  _| | || ||_   \|_   _| | || |     /  \     | || |  |_   __ \   | || |   /  ___  |  | || | |_   ___  |  | |</>");
-        $output->writeln("<fg=cyan;options=bold>| |  |  (__ \_|  | || |   \ \  / /   | || |  |   \ | |   | || |    / /\ \    | || |    | |__) |  | || |  |  (__ \_|  | || |   | |_  \_|  | |</>");
-        $output->writeln("<fg=cyan;options=bold>| |   '.___`-.   | || |    \ \/ /    | || |  | |\ \| |   | || |   / ____ \   | || |    |  ___/   | || |   '.___`-.   | || |   |  _|  _   | |</>");
-        $output->writeln("<fg=cyan;options=bold>| |  |`\____) |  | || |    _|  |_    | || | _| |_\   |_  | || | _/ /    \ \_ | || |   _| |_      | || |  |`\____) |  | || |  _| |___/ |  | |</>");
-        $output->writeln("<fg=cyan;options=bold>| |  |_______.'  | || |   |______|   | || ||_____|\____| | || ||____|  |____|| || |  |_____|     | || |  |_______.'  | || | |_________|  | |</>");
-        $output->writeln("<fg=cyan;options=bold>| |              | || |              | || |              | || |              | || |              | || |              | || |              | |</>");
-        $output->writeln("<fg=cyan;options=bold>| '--------------' || '--------------' || '--------------' || '--------------' || '--------------' || '--------------' || '--------------' |</>");
-        $output->writeln("<fg=cyan;options=bold>'----------------'  '----------------'  '----------------'  '----------------'  '----------------'  '----------------'  '----------------' </>");
+        $output->writeln("<fg=cyan;options=bold>   _____</>");
+        $output->writeln("<fg=cyan;options=bold>  / ____|</>");
+        $output->writeln("<fg=cyan;options=bold> | (___  _   _ _ __   __ _ _ __  ___  ___ </>");
+        $output->writeln("<fg=cyan;options=bold>  \___ \| | | | '_ \ / _` | '_ \/ __|/ _ \</>");
+        $output->writeln("<fg=cyan;options=bold>  ____) | |_| | | | | (_| | |_) \__ \  __/</>");
+        $output->writeln("<fg=cyan;options=bold> |_____/ \__, |_| |_|\__,_| .__/|___/\___|</>");
+        $output->writeln("<fg=cyan;options=bold>          __/ |           | |</>");
+        $output->writeln("<fg=cyan;options=bold>         |___/            |_|</>");
+        $output->writeln("<fg=cyan;options=bold></>");
+        $output->writeln("<fg=cyan;options=bold></>");
         $output->writeln("");
         $output->writeln("<fg=white;options=bold>   Coding Agent  •  Powered by Neuron AI</>");
         $output->writeln("");
