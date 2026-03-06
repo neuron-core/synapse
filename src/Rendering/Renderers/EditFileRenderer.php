@@ -14,10 +14,7 @@ use function json_decode;
 use function shell_exec;
 use function sprintf;
 use function stream_get_meta_data;
-use function str_starts_with;
 use function tmpfile;
-use function explode;
-use function implode;
 
 class EditFileRenderer implements ToolRenderer
 {
@@ -59,25 +56,12 @@ class EditFileRenderer implements ToolRenderer
         $oldPath = escapeshellarg(stream_get_meta_data($oldFile)['uri']);
         $newPath = escapeshellarg(stream_get_meta_data($newFile)['uri']);
 
-        // Use --label to show what the diff represents
-        $diff = shell_exec("diff -u --label 'search' --label 'replace' {$oldPath} {$newPath}") ?? '';
+        // Use --label to show what the diff represents (standard format with a/ and b/ prefixes)
+        $diff = shell_exec("diff -u --label 'a/search' --label 'b/replace' {$oldPath} {$newPath}") ?? '';
 
         fclose($oldFile);
         fclose($newFile);
 
-        // Remove the file headers (lines starting with --- and +++)
-        $lines = explode("\n", $diff);
-        $filtered = [];
-        foreach ($lines as $line) {
-            if (str_starts_with($line, '---')) {
-                continue;
-            }
-            if (str_starts_with($line, '+++')) {
-                continue;
-            }
-            $filtered[] = $line;
-        }
-
-        return implode("\n", $filtered);
+        return $diff;
     }
 }
