@@ -249,7 +249,7 @@ When the agent proposes a tool operation, you'll be prompted to approve it. Choo
 
 - **Allow once**: Approve this specific operation
 - **Allow for session**: Approve all operations of this type during the current session
-- **Always allow**: Approve permanently (saved to `allowed_tools` in settings)
+- **Always allow**: Approve permanently (saved to the settings file)
 - **Deny**: Reject this operation
 
 ## Contributing
