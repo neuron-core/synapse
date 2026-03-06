@@ -1,6 +1,8 @@
 # Synapse - The First PHP-Based AI Coding Agent
 
-**Synapse** is the first coding agent built entirely in PHP with the [Neuron AI framework](https://docs.neuron-ai.dev). It brings powerful AI-assisted development to the PHP ecosystem through an elegant CLI tool that combines intelligent code analysis with interactive tool approval.
+**Synapse** is the first coding agent built entirely in PHP with the [Neuron AI framework](https://docs.neuron-ai.dev).
+It brings powerful AI-assisted development to the PHP ecosystem through an elegant CLI tool that combines intelligent code analysis
+with interactive tool approval.
 
 ![PHP](https://img.shields.io/badge/PHP-8.1%2B-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
