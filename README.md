@@ -1,22 +1,63 @@
-# Synapse - Coding Agent
+# Synapse - The First PHP-Based AI Coding Agent
 
-AI-powered coding assistant built entirely in PHP with [Neuron AI framework](https://neuron-ai.dev).
-
-Synapse is a command-line tool that helps developers with software engineering tasks.
-It runs locally on your machine and provides intelligent assistance for coding, debugging, code reviews, and more using multiple AI providers.
+**Synapse** is the first coding agent built entirely in PHP with the [Neuron AI framework](https://docs.neuron-ai.dev). It brings powerful AI-assisted development to the PHP ecosystem through an elegant CLI tool that combines intelligent code analysis with interactive tool approval.
 
 ![PHP](https://img.shields.io/badge/PHP-8.1%2B-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
-## Features
+## About Synapse
 
-- **🤖 Multi-Provider Support**: Compatible with Anthropic Claude, OpenAI, Gemini, Cohere, Mistral, Ollama, Grok, and Deepseek
-- **📁 Filesystem Integration**: Read, search, and analyze code in any project directory
-- **🔌 MCP Support**: Integrate Model Context Protocol servers for extended capabilities
-- **💻 CLI-Native**: Built with [Minicli](https://docs.minicli.dev/) for a seamless terminal experience
-- **🔧 Context-Aware**: Understands project structure before making suggestions
-- **🔒 Secure**: Your code never leaves your local machine (except for AI API calls)
-- **🎯 Coding Focus**: Specialized system prompt for software engineering tasks
+While most AI coding agents are written in Python or TypeScript, Synapse demonstrates that PHP can deliver a world-class AI developer experience. Built on the modern [Neuron AI framework](https://docs.neuron-ai.dev), Synapse provides:
+
+- **Native PHP Architecture**: Every component—agent orchestration, CLI interface, event system—is implemented in PHP
+- **Tool Approval System**: Interactive confirmation before the agent executes filesystem operations
+- **Multi-Provider AI Support**: Choose from Anthropic Claude, OpenAI, Gemini, Cohere, Mistral, Ollama, Grok, or Deepseek
+- **MCP Integration**: Extend capabilities with Model Context Protocol servers
+- **Sophisticated Output Rendering**: Beautiful diffs, colored syntax highlighting, and intuitive tool call visualization
+- **Event-Driven Design**: A clean PSR-14 event system that allows extensible observability and customization
+
+## Architecture Overview
+
+Synapse is built on a clean, modular architecture:
+
+```
+bin/synapse
+  └─ SynapseCommand (Symfony Console)
+       ├─ Settings (loads .synapse/settings.json)
+       ├─ EventDispatcher + CliOutputListener
+       └─ AgentOrchestrator
+            └─ CodingAgent (extends NeuronAI Agent)
+                 ├─ ProviderFactory → AIProviderInterface
+                 ├─ FileSystemToolkit (read-only FS tools)
+                 └─ McpConnector[] (optional MCP servers)
+```
+
+### Key Components
+
+- **`CodingAgent`**: Extends `NeuronAI\Agent\Agent` with a tool approval middleware that interrupts execution for user confirmation
+- **`AgentOrchestrator`**: Drives the chat loop, catching workflow interrupts and dispatching approval events
+- **`SynapseCommand`**: Symfony Console entry point that bootstraps settings and runs the interactive REPL
+- **`Settings`**: Loads `.synapse/settings.json` with dot-notation access and persistent `allowed_tools` tracking
+- **`ProviderFactory`**: Maps provider types (`anthropic`, `openai`, `gemini`, `cohere`, `mistral`, `ollama`, `xai`/`grok`, `deepseek`) to Neuron AI provider instances
+
+### Event System
+
+A lightweight PSR-14-compatible dispatcher flows three events:
+
+| Event | Trigger |
+|---|---|
+| `AgentThinkingEvent` | Before each AI call |
+| `AgentResponseEvent` | When AI returns a message |
+| `ToolApprovalRequestedEvent` | When tool approval is needed |
+
+### Rendering Pipeline
+
+Beautiful tool call visualization through the rendering system:
+
+- **`ToolRendererMap`**: Registry mapping tool names to specialized renderers
+- **`SnippetRenderer`**: Shows key argument fields (file paths, patterns, etc.)
+- **`FileChangeRenderer`**: Produces unified diffs with ANSI coloring via `DiffRenderer`
+- **`DiffRenderer`**: Wraps Tempest Highlighter with `DiffTerminalTheme`
 
 ## Requirements
 
@@ -27,31 +68,31 @@ It runs locally on your machine and provides intelligent assistance for coding, 
 
 ### Global Installation
 
-Install Coding Agent globally on your system to use it from any directory:
+Install Synapse globally to use it from any directory:
 
 ```bash
 composer global require neuron-core/synapse
 ```
 
-Make sure Composer's global bin directory is in your PATH:
+Ensure Composer's global bin directory is in your PATH:
 
 ```bash
-# Add this to your shell profile (~/.bashrc, ~/.zshrc, etc.)
+# Add to your shell profile (~/.bashrc, ~/.zshrc, etc.)
 export PATH="$HOME/.config/composer/vendor/bin:$PATH"
 
-# Or run this to see your global bin directory
+# Or find your global bin directory
 composer global config bin-dir --absolute
 ```
 
 ### Per Project Installation
 
-Install Coding Agent as a dev dependency in your project to avoid system-level configuration:
+Install as a dev dependency in your project:
 
 ```bash
 composer require --dev neuron-core/synapse
 ```
 
-Run the command below to start the agent:
+Run the command:
 
 ```bash
 vendor/bin/synapse
@@ -61,7 +102,7 @@ vendor/bin/synapse
 
 ## Configuration
 
-Before using Coding Agent, you need to configure your AI provider and API key.
+Before using Synapse, configure your AI provider and API key.
 
 ### Setting Up `.synapse/settings.json`
 
@@ -124,11 +165,14 @@ mkdir -p .synapse && printf "{\n}" > .synapse/settings.json
 
 #### Other Providers
 
-The following providers are also supported with similar configuration:
-- **Cohere**: Set `provider.type: "cohere"` with `cohere.api_key`
-- **Mistral**: Set `provider.type: "mistral"` with `mistral.api_key`
-- **Grok (xAI)**: Set `provider.type: "xai"` with `xai.api_key` (or `grok.api_key`)
-- **Deepseek**: Set `provider.type: "deepseek"` with `deepseek.api_key`
+Additional supported providers with similar configuration:
+
+| Provider | Type | API Key |
+|---|---|---|
+| **Cohere** | `"cohere"` | `api_key` |
+| **Mistral** | `"mistral"` | `api_key` |
+| **Grok (xAI)** | `"xai"` or `"grok"` | `api_key` |
+| **Deepseek** | `"deepseek"` | `api_key` |
 
 ### MCP Server Configuration
 
@@ -160,7 +204,7 @@ Add Model Context Protocol servers to extend the agent's capabilities:
 
 ## Usage
 
-### Basic Chat
+### Interactive Mode
 
 Start an interactive chat session:
 
@@ -170,22 +214,20 @@ synapse
 
 ### Single Question
 
-Ask a single question:
+Ask a single question without entering interactive mode:
 
 ```bash
 synapse "How do I fix this PHP error?"
 ```
 
-### Working with Projects
+### Project Context
 
-Navigate to your project directory and start chatting:
+Navigate to your project directory and start chatting—the agent can read and analyze files in your current directory:
 
 ```bash
 cd /path/to/your/project
 synapse
 ```
-
-The agent can read and analyze files in your current directory to provide context-aware assistance.
 
 **Example interactions:**
 
@@ -203,36 +245,14 @@ The agent can read and analyze files in your current directory to provide contex
 > Can you refactor the UserService class to use dependency injection?
 ```
 
-### Available Commands
+### Tool Approval
 
-```bash
-synapse              # Start interactive chat
-synapse "your prompt here"        # Ask a single question
-```
+When the agent proposes a tool operation, you'll be prompted to approve it. Choose from:
 
-## How It Works
-
-Coding Agent consists of several components:
-
-1. **Neuron AI Framework**: Provides the agent architecture and tool integration
-2. **Settings Module**: Loads configuration from `.synapse/settings.json` with support for multiple AI providers
-3. **Provider Factory**: Creates provider instances dynamically based on configuration
-4. **Minicli**: Handles the CLI interface and command routing
-
-The agent has access to filesystem tools that allow it to:
-
-- List directory contents
-- Read files
-- Search for patterns in files
-- Find files by glob patterns
-- Parse documents (PDF, HTML, etc.)
-
-## Security
-
-- Your code is processed locally and only sent to your configured AI provider's API
-- No code is stored on external servers (except for API request logs by the provider)
-- Filesystem tools only read files - no writing or execution without explicit commands
-- API keys are stored in your local settings file only
+- **Allow once**: Approve this specific operation
+- **Allow for session**: Approve all operations of this type during the current session
+- **Always allow**: Approve permanently (saved to `allowed_tools` in settings)
+- **Deny**: Reject this operation
 
 ## Development
 
@@ -242,16 +262,30 @@ The agent has access to filesystem tools that allow it to:
 composer test
 ```
 
+Run a single test file:
+
+```bash
+vendor/bin/phpunit tests/Rendering/DiffRendererTest.php
+```
+
+Run a single test method:
+
+```bash
+vendor/bin/phpunit --filter testMethodName tests/Path/ToTest.php
+```
+
 ### Code Analysis
 
 ```bash
-composer analyse  # PHPStan
+composer analyse  # PHPStan static analysis (memory-limit=1G)
 ```
 
 ### Code Formatting
 
 ```bash
-composer format  # PHP CS Fixer + Rector
+composer format  # Rector (refactor) + PHP CS Fixer (style)
+composer style    # PHP CS Fixer only
+composer refactor # Rector only
 ```
 
 ## Contributing
@@ -272,14 +306,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 Built with:
 - [Neuron AI](https://docs.neuron-ai.dev/) - PHP agentic framework
-- [Minicli](https://docs.minicli.dev/) - CLI framework
-
-## Support
-
-- 📖 [Documentation](https://docs.neuron-ai.dev/)
-- 🐛 [Issue Tracker](https://github.com/neuron-core/coding-agent/issues)
-- 💬 [Discussions](https://github.com/neuron-core/coding-agent/discussions)
+- [Symfony Console](https://symfony.com/doc/current/console.html) - CLI component
+- [Tempest Highlight](https://github.com/tempestphp/highlight) - Syntax highlighting
 
 ---
 
-Made with ❤️ by [Inspector](https://inspector.dev)
+Made with ❤️ by [Valerio Barbera](https://github.com/valerio)
