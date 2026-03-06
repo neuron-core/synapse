@@ -42,7 +42,7 @@ class ToolRendererMap
             ->register('glob_path', new SnippetRenderer(['pattern', 'directory']))
             ->register('describe_directory_content', new SnippetRenderer(['directory']))
             ->register('bash', new SnippetRenderer(['command']))
-            ->register('edit_file', new EditFileRenderer($diffRenderer))
+            ->register('edit_file', new EditFileRenderer())
             ->register('write_file', $fileChange)
             ->register('delete_file', $fileChange);
     }
