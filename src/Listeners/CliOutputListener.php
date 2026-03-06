@@ -74,7 +74,7 @@ class CliOutputListener
         $this->output->writeln('');
 
         while (true) {
-            $decision = strtolower(trim($this->readInput('Enter your choice (1/2/3/4): ')));
+            $decision = strtolower(trim($this->readInput('Enter your choice: ')));
 
             if (in_array($decision, ['', '1', 'allow'], true)) {
                 return 'allow';
