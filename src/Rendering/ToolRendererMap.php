@@ -31,8 +31,7 @@ class ToolRendererMap
 
     public static function default(): self
     {
-        $diffRenderer = new DiffRenderer();
-        $fileChange = new FileChangeRenderer($diffRenderer);
+        $fileChange = new FileChangeRenderer();
 
         return (new self(new GenericRenderer()))
             ->register('read_file', new SnippetRenderer(['file_path']))

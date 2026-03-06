@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace NeuronCore\Synapse\Rendering\Renderers;
 
-use NeuronCore\Synapse\Rendering\DiffRenderer;
 use NeuronCore\Synapse\Rendering\ToolRenderer;
 
 use function escapeshellarg;
@@ -17,14 +16,21 @@ use function shell_exec;
 use function sprintf;
 use function stream_get_meta_data;
 use function tmpfile;
+use function explode;
+use function implode;
+use function str_starts_with;
 
 use const PHP_OS_FAMILY;
 
 class FileChangeRenderer implements ToolRenderer
 {
-    public function __construct(private readonly DiffRenderer $diffRenderer)
-    {
-    }
+    protected const ESC = "\033";
+    protected const RESET = self::ESC . "[0m";
+    protected const RED = self::ESC . "[31;1m";
+    protected const GREEN = self::ESC . "[32;1m";
+    protected const CYAN = self::ESC . "[36;1m";
+    protected const YELLOW = self::ESC . "[33;1m";
+    protected const GRAY = self::ESC . "[90m";
 
     public function render(string $toolName, string $arguments): string
     {
@@ -47,7 +53,7 @@ class FileChangeRenderer implements ToolRenderer
             }
 
             $diff = $this->generateDiff($path, $current, $args['content']);
-            return $this->header($toolName, $path) . $this->diffRenderer->render($diff);
+            return $this->header($toolName, $path) . $this->colorizeDiff($diff);
         }
 
         return (new GenericRenderer())->render($toolName, $arguments);
@@ -90,5 +96,44 @@ class FileChangeRenderer implements ToolRenderer
         fclose($newFile);
 
         return $diff;
+    }
+
+    protected function colorizeDiff(string $diff): string
+    {
+        $lines = explode("\n", $diff);
+        $colored = [];
+
+        foreach ($lines as $line) {
+            if (str_starts_with($line, '---')) {
+                // Skip file headers
+                continue;
+            }
+            if (str_starts_with($line, '+++')) {
+                // Skip file headers
+                continue;
+            }
+            if (str_starts_with($line, '@@')) {
+                // Skip hunk headers
+                continue;
+            }
+            if (str_starts_with($line, '-')) {
+                // Deletions - red
+                $colored[] = self::RED . $line . self::RESET;
+            } elseif (str_starts_with($line, '+')) {
+                // Additions - green
+                $colored[] = self::GREEN . $line . self::RESET;
+            } elseif (str_starts_with($line, ' ')) {
+                // Context - gray
+                $colored[] = self::GRAY . $line . self::RESET;
+            } elseif (str_starts_with($line, '\ No newline')) {
+                // Skip diff metadata lines
+                continue;
+            } elseif ($line !== '') {
+                // Keep other non-empty lines
+                $colored[] = $line;
+            }
+        }
+
+        return implode("\n", $colored);
     }
 }

@@ -103,7 +103,7 @@ class CliOutputListener
     private function askFeedback(): ?string
     {
         $helper = new QuestionHelper();
-        $question = new Question('<comment>Feedback (optional, press Enter to skip): </comment>');
+        $question = new Question('<comment>Tell me what to do instead (press Enter to skip): </comment>');
 
         return $helper->ask($this->input, $this->output, $question);
     }

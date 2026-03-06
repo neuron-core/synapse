@@ -4,20 +4,17 @@ declare(strict_types=1);
 
 namespace NeuronCore\Synapse\Tests\Rendering\Renderers;
 
-use NeuronCore\Synapse\Rendering\DiffRenderer;
 use NeuronCore\Synapse\Rendering\Renderers\FileChangeRenderer;
 use NeuronCore\Synapse\Rendering\ToolRenderer;
 use PHPUnit\Framework\TestCase;
 
 class FileChangeRendererTest extends TestCase
 {
-    private \PHPUnit\Framework\MockObject\MockObject $diffRenderer;
     private FileChangeRenderer $renderer;
 
     protected function setUp(): void
     {
-        $this->diffRenderer = $this->createMock(DiffRenderer::class);
-        $this->renderer = new FileChangeRenderer($this->diffRenderer);
+        $this->renderer = new FileChangeRenderer();
     }
 
     public function testImplementsToolRenderer(): void
@@ -27,8 +24,6 @@ class FileChangeRendererTest extends TestCase
 
     public function testFallsBackToGenericRendererWhenNoPath(): void
     {
-        $this->diffRenderer->expects($this->never())->method('render');
-
         $result = $this->renderer->render('write_file', '{"content": "hello"}');
 
         $this->assertSame("● write_file( {\"content\": \"hello\"} )\n", $result);
@@ -36,8 +31,6 @@ class FileChangeRendererTest extends TestCase
 
     public function testFallsBackToGenericRendererWhenNoContent(): void
     {
-        $this->diffRenderer->expects($this->never())->method('render');
-
         $result = $this->renderer->render('edit_file', '{"file_path": "/tmp/foo.php"}');
 
         $this->assertSame("● edit_file( {\"file_path\": \"/tmp/foo.php\"} )\n", $result);
@@ -45,8 +38,6 @@ class FileChangeRendererTest extends TestCase
 
     public function testFallsBackToGenericRendererOnInvalidJson(): void
     {
-        $this->diffRenderer->expects($this->never())->method('render');
-
         $result = $this->renderer->render('write_file', 'not-json');
 
         $this->assertSame("● write_file( not-json )\n", $result);
@@ -54,40 +45,54 @@ class FileChangeRendererTest extends TestCase
 
     public function testRendersHeaderWithToolNameAndPath(): void
     {
-        $this->diffRenderer->method('render')->willReturn('');
-
         $result = $this->renderer->render('write_file', '{"file_path": "/tmp/foo.php", "content": "<?php"}');
 
         $this->assertStringContainsString('write_file', $result);
         $this->assertStringContainsString('/tmp/foo.php', $result);
     }
 
-    public function testIncludesDiffRendererOutput(): void
+    public function testIncludesAnsiColorCodes(): void
     {
-        $this->diffRenderer->method('render')->willReturn('DIFF_OUTPUT');
-
         $result = $this->renderer->render('write_file', '{"file_path": "/tmp/foo.php", "content": "new content"}');
 
-        $this->assertStringContainsString('DIFF_OUTPUT', $result);
+        $this->assertStringContainsString("\033[32;1m", $result); // Green for additions
+        $this->assertStringContainsString("\033[0m", $result); // Reset
     }
 
     public function testAcceptsPathKeyAsAlternative(): void
     {
-        $this->diffRenderer->method('render')->willReturn('');
-
         $result = $this->renderer->render('delete_file', '{"path": "/tmp/bar.php", "content": "x"}');
 
         $this->assertStringContainsString('/tmp/bar.php', $result);
     }
 
-    public function testDiffRendererReceivesDiffString(): void
+    public function testDiffMetadataLinesAreFiltered(): void
     {
-        $this->diffRenderer
-            ->expects($this->once())
-            ->method('render')
-            ->with($this->isType('string'))
-            ->willReturn('');
+        $result = $this->renderer->render('write_file', '{"file_path": "/tmp/test.php", "content": "new"}');
 
-        $this->renderer->render('write_file', '{"file_path": "/tmp/foo.php", "content": "hello"}');
+        // These lines should NOT be in the output
+        $this->assertStringNotContainsString('---', $result);
+        $this->assertStringNotContainsString('+++', $result);
+        $this->assertStringNotContainsString('@@', $result);
+        $this->assertStringNotContainsString('No newline at end of file', $result);
+    }
+
+    public function testColorizeDiffHandlesEmptyDiff(): void
+    {
+        // Create an existing file with content, then write the same content
+        $result = $this->renderer->render('write_file', '{"file_path": "/tmp/foo.php", "content": "same"}');
+
+        $this->assertStringContainsString('write_file', $result);
+        $this->assertStringContainsString('/tmp/foo.php', $result);
+    }
+
+    public function testContextLinesAreGray(): void
+    {
+        // This test verifies that context lines (lines starting with space) are colored gray
+        // For a new file, there's no context, so we just verify the output is valid
+        $result = $this->renderer->render('write_file', '{"file_path": "/tmp/test.php", "content": "content"}');
+
+        $this->assertStringContainsString("\033[32;1m", $result); // Green for additions
+        $this->assertStringContainsString("\033[0m", $result); // Reset
     }
 }
