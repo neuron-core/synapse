@@ -27,7 +27,7 @@ foreach ($autoloadPaths as $autoloadPath) {
     }
 }
 
-use NeuronCore\Synapse\Commands\MaestroCommand;
+use NeuronCore\Maestro\Commands\MaestroCommand;
 use Symfony\Component\Console\Application;
 
 $app = new Application('Maestro', '1.x');
